@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Browse All Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 40px;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-transform: uppercase; letter-spacing: 2px;">
+    📚 COURSE – Browse All Videos
+</h2>
+
+<div class="grid">
+    {% for video in videos %}
+        <div class="card">
+            <h3>{{ video.title }}</h3>
+            <iframe 
+                src="https://www.youtube.com/embed/{{ video.id }}" 
+                frameborder="0"
+                allowfullscreen>
+            </iframe>
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

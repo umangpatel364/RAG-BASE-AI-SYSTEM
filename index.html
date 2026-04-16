@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sigma Web Course Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            padding-top: 40px;
+        }
+
+        .container {
+            width: 600px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .browse-btn {
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .browse-btn a {
+            text-decoration: none;
+            background: #1a73e8;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user {
+            text-align: right;
+            margin-bottom: 10px;
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .bot {
+            text-align: left;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .input-area {
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            border: none;
+            background: #1a73e8;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1558b0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sigma Web Course Guide</h2>
+
+    <div class="browse-btn">
+        <a href="/videos">📚 COURSE – Browse All Videos</a>
+    </div>
+
+    <div class="chat-box" id="chatBox"></div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask something..." />
+        <button onclick="speakLastResponse()">🎤 Speak</button>
+        <button onclick="stopSpeaking()">⏹ Stop</button>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+const inputBox = document.getElementById("userInput");
+const chatBox = document.getElementById("chatBox");
+
+let messageHistory = [];
+let historyIndex = -1;
+let lastBotResponse = "";
+let voices = [];
+
+inputBox.focus();
+
+// Load voices safely
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+async function sendMessage() {
+    const message = inputBox.value.trim();
+    if (!message) return;
+
+    messageHistory.push(message);
+    historyIndex = messageHistory.length;
+
+    const userDiv = document.createElement("div");
+    userDiv.className = "user";
+    userDiv.textContent = "You: " + message;
+    chatBox.appendChild(userDiv);
+
+    inputBox.value = "";
+
+    const thinkingDiv = document.createElement("div");
+    thinkingDiv.className = "bot";
+    thinkingDiv.textContent = "Assistant is thinking...";
+    chatBox.appendChild(thinkingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+    lastBotResponse = data.response;
+
+    thinkingDiv.textContent = "Assistant: " + data.response;
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function speakLastResponse() {
+    if (!lastBotResponse) {
+        alert("No response to speak!");
+        return;
+    }
+
+    const speech = new SpeechSynthesisUtterance(lastBotResponse);
+
+    const femaleVoice = voices.find(v =>
+        v.name.toLowerCase().includes("female") ||
+        v.name.toLowerCase().includes("zira") ||
+        v.name.toLowerCase().includes("google uk english female")
+    );
+
+    if (femaleVoice) {
+        speech.voice = femaleVoice;
+    }
+
+    speech.rate = 1;
+    speech.pitch = 1.1;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+}
+
+function stopSpeaking() {
+    window.speechSynthesis.cancel();
+}
+
+inputBox.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        if (messageHistory.length === 0) return;
+
+        if (historyIndex > 0) {
+            historyIndex--;
+        } else if (historyIndex === -1) {
+            historyIndex = messageHistory.length - 1;
+        }
+
+        inputBox.value = messageHistory[historyIndex];
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+
+        if (messageHistory.length === 0) return;
+
+        if (historyIndex < messageHistory.length - 1) {
+            historyIndex++;
+            inputBox.value = messageHistory[historyIndex];
+        } else {
+            historyIndex = messageHistory.length;
+            inputBox.value = "";
+        }
+    }
+});
+</script>
+
+</body>
+</html>
