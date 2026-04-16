@@ -1,0 +1,6 @@
+We previously discussed the topic of SEO, which stands for Search Engine Optimization. We also covered Video 6: "SEO and Core Web Vitals in HTML", where we delved deeper into how to optimize web pages for better search engine rankings. This video provided an overview of SEO principles and strategies for improving user experience and search engine visibility.
+
+Start Time: 10 min 1 sec
+End Time: 10 min 5 sec
+
+You can explore this topic deeply from the COURSE section.
